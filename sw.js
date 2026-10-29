@@ -1,5 +1,5 @@
 // Bei jeder Änderung an der Seite die Versionsnummer erhöhen, damit Handys das Update laden.
-const CACHE = 'stichblock-v1';
+const CACHE = 'stichblock-v2';
 const FILES = [
   './',
   './index.html',
