@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07150F">
+<title>Stichblock</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stichblock">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Cinzel:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07150F; --surface:#10261C; --sunk:#0B1C15; --ink:#EEF3E8; --muted:#A3BBA9; --line:#21402F;
+  --primary:#E9C46A; --primary-ink:#0B1C15;
+  --gold:linear-gradient(180deg,#F5D888 0%,#C9962E 100%); --gold-ink:#0B1C15; --headline:#E9C46A;
+  --display:"Cinzel","Trajan Pro",Georgia,"Times New Roman",serif;
+  --sky:radial-gradient(ellipse 90% 55% at 85% -8%,rgba(32,110,72,.55) 0%,transparent 70%),radial-gradient(ellipse 80% 50% at -8% 108%,rgba(18,80,52,.6) 0%,transparent 70%),radial-gradient(ellipse 50% 30% at 55% 50%,rgba(40,120,80,.12) 0%,transparent 70%),linear-gradient(180deg,#0A1E15 0%,#06120D 100%);
+  --red:#FF5A4E; --blue:#5B9BFF; --green:#4CD07D; --yellow:#FFD23F; --violet:#C49BFF; --teal:#3FD0DE;
+  --good:#4CD07D; --bad:#FF6A55;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100%;background:var(--sky),var(--bg);background-attachment:fixed;color:var(--ink);
+  font-family:"Bricolage Grotesque",ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.4;-webkit-tap-highlight-color:transparent;
+  font-variant-numeric:tabular-nums;
+}
+#app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.wrap{padding:16px 16px 8px;flex:1}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:8px;padding:12px 16px 0}
+.tabs{display:flex;background:var(--sunk);border-radius:12px;padding:4px;flex:1}
+.tabs button{flex:1;border:0;background:none;padding:9px 0;border-radius:9px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px rgba(233,196,106,.35),0 2px 10px rgba(0,0,0,.35)}
+.iconbtn{border:0;background:var(--sunk);width:44px;height:44px;border-radius:12px;font-size:22px;line-height:1}
+
+/* round hero */
+.hero{display:flex;align-items:flex-end;justify-content:space-between;padding:20px 4px 12px}
+.hero .no{font-family:var(--display);font-size:80px;font-weight:800;line-height:.85;letter-spacing:0;color:var(--headline);text-shadow:0 0 22px rgba(233,196,106,.45)}
+.hero .of{color:var(--muted);font-size:15px;margin-top:8px}
+.hero .deal{font-size:15px;color:var(--muted);text-align:right;margin-top:4px}
+.hero .deal b{color:var(--ink);font-weight:600}
+.steps{display:flex;gap:6px;margin:4px 0 14px}
+.steps span{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.steps span.on{background:var(--primary)}
+.phase{font-family:var(--display);font-size:22px;font-weight:600;margin:0 0 2px;color:var(--headline);letter-spacing:.02em}
+.phase-sub{color:var(--muted);font-size:15px;margin:0 0 14px}
+
+/* player rows */
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:14px;padding:10px 10px 10px 14px;border-left:6px solid var(--c)}
+.row.done{opacity:.98}
+.who{flex:1;min-width:0}
+.who .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .meta{font-size:14px;color:var(--muted)}
+.who .warn{font-size:14px;color:var(--bad);font-weight:600}
+.stepper{display:flex;align-items:center;background:var(--sunk);border-radius:12px}
+.stepper button{border:0;background:none;width:46px;height:46px;font-size:24px;font-weight:600;color:var(--primary)}
+.stepper button:disabled{color:var(--line)}
+.stepper .val{min-width:40px;text-align:center;font-size:24px;font-weight:800;border:0;background:none;padding:0}
+.result{font-size:14px;font-weight:600;min-width:46px;text-align:right}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+
+/* bottom bar */
+.bar{position:sticky;bottom:0;background:var(--bg);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.sum{display:flex;justify-content:space-between;font-size:15px;color:var(--muted);margin-bottom:8px;gap:12px}
+.sum b{color:var(--ink)}
+.sum .msg{color:var(--bad);font-weight:600;text-align:right}
+.sum .ok{color:var(--good);font-weight:600}
+.primary{width:100%;border:0;border-radius:14px;padding:15px;font-size:18px;font-weight:600;background:var(--gold);color:var(--gold-ink);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.primary:disabled{background:var(--line);color:var(--muted)}
+.ghost{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:13px;font-weight:600;margin-top:8px}
+.link{border:0;background:none;color:var(--primary);font-weight:600;padding:10px 0}
+
+/* setup */
+h1{font-family:var(--display);font-size:32px;font-weight:800;letter-spacing:.01em;margin:8px 0 4px;line-height:1.15;color:var(--headline)}
+.lead{color:var(--muted);margin:0 0 20px}
+h2{font-size:19px;font-weight:600;margin:24px 0 10px}
+.pl{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.pl input{flex:1;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);min-width:0}
+.pl .rm{border:0;background:none;width:40px;height:40px;font-size:22px;color:var(--muted)}
+.choice{display:flex;flex-direction:column;gap:8px}
+.choice label{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:2px solid transparent;border-radius:14px;padding:12px 14px;cursor:pointer}
+.choice label:has(input:checked){border-color:var(--primary)}
+.choice input{margin-top:4px;accent-color:var(--primary);width:18px;height:18px}
+.choice b{display:block;font-weight:600}
+.choice small{color:var(--muted);font-size:14px}
+select{font:inherit;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border-radius:14px;padding:12px 14px}
+.switch small{display:block;color:var(--muted);font-size:14px}
+.switch input{width:22px;height:22px;accent-color:var(--primary);flex:none}
+
+/* table */
+.tablewrap{overflow-x:auto;background:var(--surface);border-radius:14px;margin-top:16px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;position:sticky;top:0;background:var(--surface)}
+th .bar-c{display:block;height:4px;border-radius:2px;background:var(--c);margin-top:4px}
+td:first-child,th:first-child{position:sticky;left:0;background:var(--surface);color:var(--muted);text-align:left}
+td .t{font-weight:800;font-size:16px}
+td .bt{display:block;font-size:12px}
+tr.total td{font-weight:800;font-size:18px;border-bottom:0}
+td.lead-c .t, tr.total td.lead-c{color:var(--primary)}
+
+/* end */
+.rank{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.rank .r{display:flex;align-items:center;gap:14px;background:var(--surface);border-radius:14px;padding:14px;border-left:6px solid var(--c)}
+.rank .p{font-size:28px;font-weight:800;width:36px}
+.rank .n{flex:1;font-weight:600}
+.rank .s{font-size:22px;font-weight:800}
+.rank .r:first-child{padding:20px 14px}
+.rank .r:first-child .p,.rank .r:first-child .s{font-size:36px}
+
+/* menu + toast */
+dialog{border:0;border-radius:18px;padding:8px;background:var(--surface);color:var(--ink);width:min(92vw,400px)}
+dialog::backdrop{background:rgba(10,14,32,.45)}
+dialog button{display:block;width:100%;text-align:left;border:0;background:none;padding:14px 16px;border-radius:12px;font-weight:600}
+dialog button:hover{background:var(--sunk)}
+dialog .danger{color:var(--bad)}
+.toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="menu">
+  <button data-action="edit-last">Letzte Runde korrigieren</button>
+  <button data-action="finish">Spiel jetzt beenden</button>
+  <button data-action="new" class="danger">Neues Spiel</button>
+  <button data-action="close-menu">Abbrechen</button>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const KEY = 'stichblock.game.v1';
+const NAMES_KEY = 'stichblock.names.v1';
+const COLORS = ['var(--red)','var(--blue)','var(--green)','var(--yellow)','var(--violet)','var(--teal)'];
+const RULES = {
+  standard: ['Standard', 'Ansagen sind frei.'],
+  equal:    ['Aufgehen', 'Die Ansagen müssen zusammen genau die Kartenzahl ergeben.'],
+  notequal: ['Nicht aufgehen', 'Die Ansagen dürfen zusammen nicht die Kartenzahl ergeben.']
+};
+
+/* ---------- storage ---------- */
+function load(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+function save(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function clear(k){ try { localStorage.removeItem(k); } catch(e){} }
+
+/* ---------- state ---------- */
+let G = load(KEY);
+let view = 'round';
+let peek = {};
+const savedNames = load(NAMES_KEY);
+let draft = { names: (savedNames && savedNames.length >= 3) ? savedNames : ['', '', '', ''], firstDealer: 0, rule: 'standard', secret: false };
+
+/* ---------- game logic ---------- */
+const nP = g => g.players.length;
+const totalRounds = g => Math.floor(60 / nP(g));
+const roundNo = g => g.rounds.length + 1;
+const dealer = g => (g.firstDealer + g.rounds.length) % nP(g);
+const order = g => Array.from({length: nP(g)}, (_, k) => (dealer(g) + 1 + k) % nP(g));
+const score = (b, t) => b === t ? 20 + 10 * t : -10 * Math.abs(b - t);
+const sum = a => a.reduce((x, y) => x + y, 0);
+function totals(g){ const t = Array(nP(g)).fill(0); g.rounds.forEach(r => r.bids.forEach((b, i) => t[i] += score(b, r.tricks[i]))); return t; }
+
+function bidStatus(g){
+  const r = roundNo(g), s = sum(g.cur.bids);
+  if (g.secret || g.rule === 'standard') return { ok: true, s };
+  if (g.rule === 'equal') return { ok: s === r, s, msg: `Muss zusammen ${r} ergeben` };
+  return { ok: s !== r, s, msg: `Darf zusammen nicht ${r} ergeben` };
+}
+function lastBidderHint(g){
+  if (g.secret || g.rule === 'standard') return '';
+  const ord = order(g), last = ord[ord.length - 1], r = roundNo(g);
+  const others = sum(g.cur.bids) - g.cur.bids[last];
+  const v = r - others;
+  if (g.rule === 'equal') return (v >= 0 && v <= r) ? `Muss ${v} ansagen` : 'Ansagen der anderen sind zu hoch';
+  return (v >= 0 && v <= r) ? `Darf nicht ${v} ansagen` : '';
+}
+function newRound(g){ g.cur = { phase: 'bid', bids: Array(nP(g)).fill(0), tricks: Array(nP(g)).fill(0) }; }
+
+/* ---------- helpers ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n);
+function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 1600); }
+function fan(r){
+  const n = Math.min(r, 20), spread = Math.min(80, 6 + n * 6), suits = ['var(--red)','var(--blue)','var(--green)','var(--yellow)'];
+  let s = '';
+  for (let k = 0; k < n; k++){
+    const a = n === 1 ? 0 : -spread / 2 + spread * k / (n - 1);
+    s += `<rect x="56" y="8" width="28" height="42" rx="4" fill="var(--surface)" stroke="${suits[k % 4]}" stroke-width="2.5" transform="rotate(${a.toFixed(1)} 70 74)"/>`;
+  }
+  return `<svg viewBox="0 0 140 62" width="140" height="62" aria-hidden="true">${s}</svg>`;
+}
+
+/* ---------- views ---------- */
+function render(){
+  const app = document.getElementById('app');
+  if (!G) app.innerHTML = setupView();
+  else if (G.finished && view !== 'table') app.innerHTML = endView();
+  else app.innerHTML = topBar() + (view === 'table' ? tableView() : roundView());
+}
+
+function setupView(){
+  const n = draft.names.length;
+  const players = draft.names.map((nm, i) => `
+    <div class="pl" style="--c:${COLORS[i]}">
+      <span class="dot"></span>
+      <input value="${esc(nm)}" placeholder="Spieler ${i + 1}" data-name="${i}" autocomplete="off" aria-label="Name Spieler ${i + 1}">
+      ${n > 3 ? `<button class="rm" data-action="rm-player" data-i="${i}" aria-label="Spieler entfernen">×</button>` : ''}
+    </div>`).join('');
+  const dealers = draft.names.map((nm, i) => `<option value="${i}" ${draft.firstDealer === i ? 'selected' : ''}>${esc(nm || 'Spieler ' + (i + 1))}</option>`).join('');
+  const rules = Object.entries(RULES).map(([k, [t, d]]) => `
+    <label><input type="radio" name="rule" value="${k}" ${draft.rule === k ? 'checked' : ''}><span><b>${t}</b><small>${d}</small></span></label>`).join('');
+  return `<div class="wrap">
+    <h1>Neues Spiel</h1>
+    <p class="lead">Tragt die Spieler in Sitzreihenfolge ein, im Uhrzeigersinn.</p>
+    <h2>Spieler</h2>
+    ${players}
+    ${n < 6 ? `<button class="link" data-action="add-player">+ Spieler hinzufügen</button>` : ''}
+    <h2>Wer gibt zuerst?</h2>
+    <select data-field="dealer">${dealers}</select>
+    <h2>Regel</h2>
+    <div class="choice">${rules}</div>
+    <h2>Ansagen</h2>
+    <label class="switch"><span>Verdeckt ansagen<small>Jeder gibt seine Ansage geheim ein, sie wird erst bei den Stichen gezeigt.</small></span><input type="checkbox" data-field="secret" ${draft.secret ? 'checked' : ''}></label>
+  </div>
+  <div class="bar"><div class="sum"><span>${n} Spieler, ${Math.floor(60 / n)} Runden</span></div><button class="primary" data-action="start">Spiel starten</button></div>`;
+}
+
+function topBar(){
+  return `<div class="top">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="${view === 'round'}" data-action="tab" data-v="round">${G.finished ? 'Ergebnis' : 'Runde'}</button>
+      <button role="tab" aria-selected="${view === 'table'}" data-action="tab" data-v="table">Tabelle</button>
+    </div>
+    <button class="iconbtn" data-action="menu" aria-label="Menü">⋯</button>
+  </div>`;
+}
+
+function roundView(){
+  const g = G, r = roundNo(g), c = g.cur, tot = totals(g), bidding = c.phase === 'bid';
+  const ord = order(g), lastI = ord[ord.length - 1], hint = bidding ? lastBidderHint(g) : '';
+  const rows = ord.map(i => {
+    const val = bidding ? c.bids[i] : c.tricks[i];
+    const hidden = bidding && g.secret && !peek[i];
+    let meta = `${tot[i]} Punkte`;
+    if (!bidding) meta = `Ansage ${c.bids[i]}, bisher ${tot[i]}`;
+    const pts = !bidding ? score(c.bids[i], c.tricks[i]) : null;
+    return `<div class="row" style="--c:${COLORS[i]}">
+      <div class="who">
+        <div class="name">${esc(g.players[i])}</div>
+        <div class="meta">${meta}</div>
+        ${bidding && i === lastI && hint ? `<div class="warn">${hint}</div>` : ''}
+      </div>
+      ${pts !== null ? `<span class="result ${pts >= 0 ? 'pos' : 'neg'}">${signed(pts)}</span>` : ''}
+      <div class="stepper">
+        <button data-action="dec" data-i="${i}" ${val <= 0 ? 'disabled' : ''} aria-label="weniger">−</button>
+        <button class="val" data-action="peek" data-i="${i}" aria-label="${hidden ? 'verdeckt, tippen zum Anzeigen' : val}">${hidden ? '•' : val}</button>
+        <button data-action="inc" data-i="${i}" ${val >= r ? 'disabled' : ''} aria-label="mehr">+</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  let summary, btn;
+  if (bidding){
+    const st = bidStatus(g);
+    const diff = st.s - r;
+    const shape = g.secret ? 'Ansagen sind verdeckt' : `Angesagt: <b>${st.s}</b> von ${r}`;
+    const right = g.secret ? '' : (!st.ok ? `<span class="msg">${st.msg}</span>` : `<span>${diff > 0 ? 'überreizt' : diff < 0 ? 'unterreizt' : 'geht auf'}</span>`);
+    summary = `<div class="sum"><span>${shape}</span>${right}</div>`;
+    btn = `<button class="primary" data-action="to-tricks" ${st.ok ? '' : 'disabled'}>Ansagen fertig</button>`;
+  } else {
+    const s = sum(c.tricks), ok = s === r;
+    summary = `<div class="sum"><span>Stiche: <b>${s}</b> von ${r}</span>${ok ? '<span class="ok">passt</span>' : `<span class="msg">${s < r ? 'Es fehlen ' + (r - s) : (s - r) + ' zu viel'}</span>`}</div>`;
+    btn = `<button class="primary" data-action="score" ${ok ? '' : 'disabled'}>Runde werten</button>
+           <button class="ghost" data-action="to-bids">Zurück zu den Ansagen</button>`;
+  }
+
+  return `<div class="wrap">
+    <div class="hero">
+      <div><div class="no">${r}</div><div class="of">Runde ${r} von ${totalRounds(g)}, ${r} ${r === 1 ? 'Karte' : 'Karten'}</div></div>
+      <div>${fan(r)}<div class="deal"><b>${esc(g.players[dealer(g)])}</b> gibt</div></div>
+    </div>
+    <div class="steps"><span class="on"></span><span class="${bidding ? '' : 'on'}"></span></div>
+    <p class="phase">${bidding ? 'Ansagen' : 'Stiche'}</p>
+    <p class="phase-sub">${bidding ? (g.secret ? 'Handy reihum weitergeben. Tippe auf die Zahl, um deine Ansage kurz zu sehen.' : 'In dieser Reihenfolge ansagen.') : 'Vorausgefüllt mit den Ansagen, nur Abweichungen ändern.'}</p>
+    <div class="rows">${rows}</div>
+  </div>
+  <div class="bar">${summary}${btn}</div>`;
+}
+
+function tableView(){
+  const g = G, tot = totals(g), max = Math.max(...tot);
+  const head = g.players.map((p, i) => `<th style="--c:${COLORS[i]}">${esc(p)}<span class="bar-c"></span></th>`).join('');
+  const run = Array(nP(g)).fill(0);
+  const body = g.rounds.map((rd, k) => {
+    const cells = rd.bids.map((b, i) => {
+      const t = rd.tricks[i], s = score(b, t); run[i] += s;
+      return `<td><span class="t">${run[i]}</span><span class="bt ${s >= 0 ? 'pos' : 'neg'}">${b} / ${t}</span></td>`;
+    }).join('');
+    return `<tr><td>${k + 1}</td>${cells}</tr>`;
+  }).join('');
+  const totalRow = g.rounds.length ? `<tr class="total"><td>Σ</td>${tot.map(t => `<td class="${t === max ? 'lead-c' : ''}">${t}</td>`).join('')}</tr>` : '';
+  return `<div class="wrap">
+    <p class="phase" style="margin-top:12px">Tabelle</p>
+    <p class="phase-sub">Pro Runde: Punktestand, darunter Ansage / Stiche.</p>
+    ${g.rounds.length ? `<div class="tablewrap"><table><thead><tr><th>#</th>${head}</tr></thead><tbody>${body}${totalRow}</tbody></table></div>` : '<p class="lead">Nach der ersten gewerteten Runde erscheint hier die Tabelle.</p>'}
+  </div>`;
+}
+
+function endView(){
+  const g = G, tot = totals(g);
+  const ranked = g.players.map((p, i) => ({ p, i, s: tot[i] })).sort((a, b) => b.s - a.s);
+  let place = 0, prev = null;
+  const rows = ranked.map((x, k) => { if (x.s !== prev){ place = k + 1; prev = x.s; } return `<div class="r" style="--c:${COLORS[x.i]}"><span class="p">${place}.</span><span class="n">${esc(x.p)}</span><span class="s">${x.s}</span></div>`; }).join('');
+  return topBar() + `<div class="wrap">
+    <h1>${esc(ranked[0].p)} gewinnt</h1>
+    <p class="lead">Nach ${g.rounds.length} ${g.rounds.length === 1 ? 'Runde' : 'Runden'}.</p>
+    <div class="rank">${rows}</div>
+  </div>
+  <div class="bar"><button class="primary" data-action="rematch">Nochmal mit denselben Spielern</button><button class="ghost" data-action="new">Neues Spiel einrichten</button></div>`;
+}
+
+/* ---------- actions ---------- */
+function persist(){ if (G) save(KEY, G); else clear(KEY); }
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]'); if (!el) return;
+  const a = el.dataset.action, i = +el.dataset.i;
+  const menu = document.getElementById('menu');
+  wake();
+  switch (a){
+    case 'add-player': syncNames(); draft.names.push(''); break;
+    case 'rm-player': syncNames(); draft.names.splice(i, 1); if (draft.firstDealer >= draft.names.length) draft.firstDealer = 0; break;
+    case 'start': {
+      syncNames();
+      const players = draft.names.map((n, k) => n.trim() || 'Spieler ' + (k + 1));
+      save(NAMES_KEY, draft.names.map(n => n.trim()));
+      G = { players, rule: draft.rule, secret: draft.secret, firstDealer: draft.firstDealer, rounds: [], finished: false };
+      newRound(G); view = 'round'; break;
+    }
+    case 'tab': view = el.dataset.v; break;
+    case 'inc': case 'dec': {
+      const arr = G.cur.phase === 'bid' ? G.cur.bids : G.cur.tricks;
+      arr[i] = Math.max(0, Math.min(roundNo(G), arr[i] + (a === 'inc' ? 1 : -1)));
+      if (G.cur.phase === 'bid' && G.secret){ peek[i] = true; clearTimeout(peek['t' + i]); peek['t' + i] = setTimeout(() => { peek[i] = false; render(); }, 1200); }
+      break;
+    }
+    case 'peek':
+      if (G.cur.phase === 'bid' && G.secret){ peek[i] = !peek[i]; clearTimeout(peek['t' + i]); if (peek[i]) peek['t' + i] = setTimeout(() => { peek[i] = false; render(); }, 1500); }
+      break;
+    case 'to-tricks': G.cur.phase = 'trick'; G.cur.tricks = G.cur.bids.slice(); peek = {}; break;
+    case 'to-bids': G.cur.phase = 'bid'; break;
+    case 'score': {
+      const r = roundNo(G);
+      G.rounds.push({ bids: G.cur.bids.slice(), tricks: G.cur.tricks.slice() });
+      if (G.rounds.length >= totalRounds(G)){ G.finished = true; view = 'round'; }
+      else { newRound(G); toast(`Runde ${r} gewertet`); }
+      window.scrollTo({ top: 0 });
+      break;
+    }
+    case 'menu': menu.showModal(); return;
+    case 'close-menu': menu.close(); return;
+    case 'edit-last':
+      menu.close();
+      if (!G || !G.rounds.length){ toast('Noch keine Runde gewertet'); return; }
+      { const last = G.rounds.pop(); G.cur = { phase: 'trick', bids: last.bids, tricks: last.tricks }; G.finished = false; view = 'round'; }
+      break;
+    case 'finish':
+      menu.close();
+      if (!G.rounds.length){ toast('Noch keine Runde gewertet'); return; }
+      if (confirm('Spiel jetzt beenden und Ergebnis zeigen?')){ G.finished = true; view = 'round'; }
+      break;
+    case 'new':
+      menu.close();
+      if (G && !G.finished && G.rounds.length && !confirm('Das laufende Spiel wird gelöscht. Neues Spiel einrichten?')) return;
+      if (G) draft = { names: G.players.slice(), firstDealer: 0, rule: G.rule, secret: G.secret };
+      G = null; break;
+    case 'rematch':
+      G = { players: G.players, rule: G.rule, secret: G.secret, firstDealer: (G.firstDealer + 1) % G.players.length, rounds: [], finished: false };
+      newRound(G); view = 'round'; break;
+  }
+  persist(); render();
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.name === 'rule') draft.rule = t.value;
+  else if (t.dataset.field === 'dealer') draft.firstDealer = +t.value;
+  else if (t.dataset.field === 'secret') draft.secret = t.checked;
+  else return;
+  syncNames(); render();
+});
+document.addEventListener('input', e => {
+  if (e.target.dataset.name !== undefined){
+    draft.names[+e.target.dataset.name] = e.target.value;
+    const opt = document.querySelector(`select[data-field="dealer"] option[value="${e.target.dataset.name}"]`);
+    if (opt) opt.textContent = e.target.value || 'Spieler ' + (+e.target.dataset.name + 1);
+  }
+});
+function syncNames(){ document.querySelectorAll('input[data-name]').forEach(inp => draft.names[+inp.dataset.name] = inp.value); }
+
+/* keep the screen on during a game */
+let lock = null;
+async function wake(){ try { if ('wakeLock' in navigator && !lock && document.visibilityState === 'visible'){ lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => lock = null); } } catch(e){} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && G) wake(); });
+
+render();
+
+/* offline support */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
